@@ -1,0 +1,9 @@
+{
+  "name": "Component Documentation Generator",
+  "id": "component-documentation-generator",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": ["figma"]
+}
