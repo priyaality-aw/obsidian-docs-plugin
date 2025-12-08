@@ -921,7 +921,7 @@ function createSection2FormalDefinition(
     // Other Properties subsection with header and container
     const otherPropsSection = createAutoLayoutFrame("Other Properties", "VERTICAL", 0, 16);
 
-    const otherPropsHeading = createSubheadingText("Other Properties");
+    const otherPropsHeading = createSubheadingText("Other properties");
     otherPropsSection.appendChild(otherPropsHeading);
 
     // Get the default variant to use for visual display
