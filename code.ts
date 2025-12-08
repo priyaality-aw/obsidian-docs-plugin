@@ -2,31 +2,37 @@
 // Configuration Constants
 // =============================================================================
 
-const DEFAULT_DO_DONT_ROWS = 3;
+const DEFAULT_DO_DONT_ROWS = 1;
 
-const FRAME_WIDTH = 960;
+const FRAME_PADDING = 64;
 const SECTION_PADDING = 32;
+const SECTION_SPACING = 32;
 const ITEM_SPACING = 16;
 const TABLE_CELL_PADDING = 12;
 
-// Colors
+// Colors matching Figma design
 const COLORS = {
-  background: { r: 1, g: 1, b: 1 },           // White
-  sectionBg: { r: 0.98, g: 0.98, b: 0.98 },   // Light gray
+  background: { r: 1, g: 1, b: 1 },           // White #FFFFFF
+  sectionBg: { r: 0.988, g: 0.988, b: 0.973 }, // Cream #FCFCF8
   headerBg: { r: 0.9, g: 0.9, b: 0.9 },       // Gray for table header
-  doColor: { r: 0.929, g: 0.973, b: 0.941 },  // #EDF8F0
-  dontColor: { r: 0.980, g: 0.937, b: 0.937 }, // #FAEFEF
-  border: { r: 0.8, g: 0.8, b: 0.8 },         // Border gray
-  text: { r: 0.1, g: 0.1, b: 0.1 },           // Dark text
-  placeholder: { r: 0.5, g: 0.5, b: 0.5 },    // Gray placeholder text
+  doColor: { r: 0.941, g: 0.973, b: 0.929 },  // #F0F8ED
+  dontColor: { r: 0.992, g: 0.945, b: 0.945 }, // #FDF1F1
+  doText: { r: 0.267, g: 0.506, b: 0.192 },   // #448131
+  dontText: { r: 0.812, g: 0.090, b: 0.090 }, // #CF1717
+  border: { r: 0.816, g: 0.816, b: 0.816 },   // #D0D0D0
+  text: { r: 0.102, g: 0.102, b: 0.102 },     // #1A1A1A
+  placeholder: { r: 0.5, g: 0.5, b: 0.5 },    // Grey
+  subtleText: { r: 0.4, g: 0.4, b: 0.4 },     // #666666
 };
 
-// Font settings - using Roboto which is reliably available in Figma
+// Font settings - using Manrope as primary (matching Figma design)
 let FONTS = {
-  heading: { family: "Roboto", style: "Bold" } as FontName,
-  subheading: { family: "Roboto", style: "Medium" } as FontName,
-  body: { family: "Roboto", style: "Regular" } as FontName,
-  bold: { family: "Roboto", style: "Bold" } as FontName,
+  title: { family: "Manrope", style: "Bold" } as FontName,
+  heading: { family: "Manrope", style: "Bold" } as FontName,
+  subheading: { family: "Manrope", style: "SemiBold" } as FontName,
+  body: { family: "Manrope", style: "Regular" } as FontName,
+  bold: { family: "Manrope", style: "SemiBold" } as FontName,
+  medium: { family: "Manrope", style: "Medium" } as FontName,
 };
 
 // =============================================================================
@@ -34,22 +40,25 @@ let FONTS = {
 // =============================================================================
 
 async function loadRequiredFonts(): Promise<boolean> {
-  // Try Roboto first (commonly available)
+  // Try Manrope first (matching Figma design)
   try {
     await Promise.all([
-      figma.loadFontAsync({ family: "Roboto", style: "Bold" }),
-      figma.loadFontAsync({ family: "Roboto", style: "Medium" }),
-      figma.loadFontAsync({ family: "Roboto", style: "Regular" }),
+      figma.loadFontAsync({ family: "Manrope", style: "Bold" }),
+      figma.loadFontAsync({ family: "Manrope", style: "SemiBold" }),
+      figma.loadFontAsync({ family: "Manrope", style: "Medium" }),
+      figma.loadFontAsync({ family: "Manrope", style: "Regular" }),
     ]);
     FONTS = {
-      heading: { family: "Roboto", style: "Bold" },
-      subheading: { family: "Roboto", style: "Medium" },
-      body: { family: "Roboto", style: "Regular" },
-      bold: { family: "Roboto", style: "Bold" },
+      title: { family: "Manrope", style: "Bold" },
+      heading: { family: "Manrope", style: "Bold" },
+      subheading: { family: "Manrope", style: "SemiBold" },
+      body: { family: "Manrope", style: "Regular" },
+      bold: { family: "Manrope", style: "SemiBold" },
+      medium: { family: "Manrope", style: "Medium" },
     };
     return true;
   } catch (e) {
-    console.log("Roboto not available, trying Inter...");
+    console.log("Manrope not available, trying Inter...");
   }
 
   // Try Inter as fallback
@@ -57,34 +66,40 @@ async function loadRequiredFonts(): Promise<boolean> {
     await Promise.all([
       figma.loadFontAsync({ family: "Inter", style: "Bold" }),
       figma.loadFontAsync({ family: "Inter", style: "Semi Bold" }),
+      figma.loadFontAsync({ family: "Inter", style: "Medium" }),
       figma.loadFontAsync({ family: "Inter", style: "Regular" }),
     ]);
     FONTS = {
+      title: { family: "Inter", style: "Bold" },
       heading: { family: "Inter", style: "Bold" },
       subheading: { family: "Inter", style: "Semi Bold" },
       body: { family: "Inter", style: "Regular" },
-      bold: { family: "Inter", style: "Bold" },
+      bold: { family: "Inter", style: "Semi Bold" },
+      medium: { family: "Inter", style: "Medium" },
     };
     return true;
   } catch (e) {
-    console.log("Inter not available, trying Arial...");
+    console.log("Inter not available, trying Roboto...");
   }
 
-  // Final fallback to Arial (should always be available)
+  // Try Roboto as fallback
   try {
     await Promise.all([
-      figma.loadFontAsync({ family: "Arial", style: "Bold" }),
-      figma.loadFontAsync({ family: "Arial", style: "Regular" }),
+      figma.loadFontAsync({ family: "Roboto", style: "Bold" }),
+      figma.loadFontAsync({ family: "Roboto", style: "Medium" }),
+      figma.loadFontAsync({ family: "Roboto", style: "Regular" }),
     ]);
     FONTS = {
-      heading: { family: "Arial", style: "Bold" },
-      subheading: { family: "Arial", style: "Bold" },
-      body: { family: "Arial", style: "Regular" },
-      bold: { family: "Arial", style: "Bold" },
+      title: { family: "Roboto", style: "Bold" },
+      heading: { family: "Roboto", style: "Bold" },
+      subheading: { family: "Roboto", style: "Medium" },
+      body: { family: "Roboto", style: "Regular" },
+      bold: { family: "Roboto", style: "Medium" },
+      medium: { family: "Roboto", style: "Medium" },
     };
     return true;
   } catch (e) {
-    console.log("Arial not available either");
+    console.log("Roboto not available either");
   }
 
   return false;
@@ -108,25 +123,50 @@ function createTextNode(
   return text;
 }
 
+// Title text - 40px Bold (for main title)
+function createTitleText(content: string): TextNode {
+  return createTextNode(content, FONTS.title, 40);
+}
+
+// Section heading - 32px Bold
 function createHeadingText(content: string): TextNode {
-  return createTextNode(content, FONTS.heading, 24);
+  return createTextNode(content, FONTS.heading, 32);
 }
 
+// Subsection heading - 24px SemiBold
 function createSubheadingText(content: string): TextNode {
-  return createTextNode(content, FONTS.subheading, 18);
+  return createTextNode(content, FONTS.subheading, 24);
 }
 
+// Variant/property title - 20px SemiBold
+function createItemTitleText(content: string): TextNode {
+  return createTextNode(content, FONTS.subheading, 20);
+}
+
+// Body text - 16px for labels, 20px for descriptions
 function createBodyText(content: string, isPlaceholder = false): TextNode {
   return createTextNode(
     content,
     FONTS.body,
-    14,
-    isPlaceholder ? COLORS.placeholder : COLORS.text
+    20,
+    isPlaceholder ? COLORS.placeholder : COLORS.subtleText
   );
 }
 
+function createLabelText(content: string): TextNode {
+  return createTextNode(content, FONTS.bold, 16);
+}
+
+function createValueText(content: string): TextNode {
+  return createTextNode(content, FONTS.body, 16);
+}
+
 function createBoldBodyText(content: string): TextNode {
-  return createTextNode(content, FONTS.bold, 14);
+  return createTextNode(content, FONTS.bold, 16);
+}
+
+function createMediumText(content: string): TextNode {
+  return createTextNode(content, FONTS.medium, 14, COLORS.placeholder);
 }
 
 // Create text with mixed bold/regular formatting
@@ -172,9 +212,9 @@ function createAutoLayoutFrame(
 }
 
 function createSectionFrame(name: string): FrameNode {
-  const frame = createAutoLayoutFrame(name, "VERTICAL", SECTION_PADDING, ITEM_SPACING);
+  const frame = createAutoLayoutFrame(name, "VERTICAL", SECTION_PADDING, SECTION_SPACING);
   frame.fills = [{ type: "SOLID", color: COLORS.sectionBg }];
-  frame.cornerRadius = 8;
+  frame.cornerRadius = 12;
   // Note: layoutSizingHorizontal must be set AFTER appending to parent
   return frame;
 }
@@ -192,7 +232,7 @@ function createSection1Description(component: ComponentNode | ComponentSetNode):
 
   // Description / starter summary
   const descriptionFrame = createAutoLayoutFrame("Description", "VERTICAL", 0, 8);
-  const descLabel = createBoldBodyText("Description:");
+  const descLabel = createLabelText("Description:");
   descriptionFrame.appendChild(descLabel);
 
   const hasDescription = component.description && component.description.trim().length > 0;
@@ -205,16 +245,8 @@ function createSection1Description(component: ComponentNode | ComponentSetNode):
   section.appendChild(descriptionFrame);
   descriptionFrame.layoutSizingHorizontal = "FILL";
 
-  // Separator
-  const separator = figma.createRectangle();
-  separator.name = "Separator";
-  separator.resize(100, 1);
-  separator.fills = [{ type: "SOLID", color: COLORS.border }];
-  section.appendChild(separator);
-  separator.layoutSizingHorizontal = "FILL";
-
-  // Bullet prompts
-  const promptsFrame = createAutoLayoutFrame("Prompts", "VERTICAL", 0, 16);
+  // Three-column prompts layout (matching Figma design)
+  const promptsFrame = createAutoLayoutFrame("Prompts", "HORIZONTAL", 0, 16);
 
   const prompts = [
     {
@@ -458,9 +490,9 @@ function formatVariantHeading(variantName: string): string {
 }
 
 function createVariantVisualRow(variant: ComponentNode): FrameNode {
-  const row = createAutoLayoutFrame(`Variant: ${variant.name}`, "HORIZONTAL", 16, 24);
+  const row = createAutoLayoutFrame(`Variant: ${variant.name}`, "HORIZONTAL", 24, 24);
   row.fills = [{ type: "SOLID", color: COLORS.background }];
-  row.cornerRadius = 8;
+  row.cornerRadius = 12;
   row.strokes = [{ type: "SOLID", color: COLORS.border }];
   row.strokeWeight = 1;
 
@@ -480,7 +512,7 @@ function createVariantVisualRow(variant: ComponentNode): FrameNode {
   const rightSide = createAutoLayoutFrame("Properties List", "VERTICAL", 0, 8);
 
   // Use variant name as heading in "Property_name: variant_name" format
-  const propsHeading = createSubheadingText(formatVariantHeading(variant.name));
+  const propsHeading = createItemTitleText(formatVariantHeading(variant.name));
   rightSide.appendChild(propsHeading);
 
   const visualProps = extractVisualProperties(variant);
@@ -492,10 +524,10 @@ function createVariantVisualRow(variant: ComponentNode): FrameNode {
     for (const prop of visualProps) {
       const propRow = createAutoLayoutFrame("Property Row", "HORIZONTAL", 0, 8);
 
-      const propName = createBoldBodyText(`${prop.name}:`);
+      const propName = createLabelText(`${prop.name}:`);
       propRow.appendChild(propName);
 
-      const propValue = createBodyText(prop.value);
+      const propValue = createValueText(prop.value);
       propRow.appendChild(propValue);
 
       rightSide.appendChild(propRow);
@@ -587,9 +619,9 @@ function createPropertyVisualRow(
   propertyDef: ComponentPropertyDefinitions[string],
   defaultVariant: ComponentNode
 ): FrameNode {
-  const row = createAutoLayoutFrame(`Property: ${propertyName}`, "HORIZONTAL", 16, 24);
+  const row = createAutoLayoutFrame(`Property: ${propertyName}`, "HORIZONTAL", 24, 24);
   row.fills = [{ type: "SOLID", color: COLORS.background }];
-  row.cornerRadius = 8;
+  row.cornerRadius = 12;
   row.strokes = [{ type: "SOLID", color: COLORS.border }];
   row.strokeWeight = 1;
 
@@ -687,7 +719,7 @@ function createPropertyVisualRow(
 
   // Property name as heading (cleaned up without Figma's internal ID)
   const displayName = cleanPropertyName(propertyName);
-  const propHeading = createSubheadingText(displayName);
+  const propHeading = createItemTitleText(displayName);
   rightSide.appendChild(propHeading);
 
   // Property details
@@ -695,8 +727,8 @@ function createPropertyVisualRow(
 
   // Type
   const typeRow = createAutoLayoutFrame("Type Row", "HORIZONTAL", 0, 8);
-  const typeLabel = createBoldBodyText("Type:");
-  const typeValue = createBodyText(mapPropertyType(propertyDef.type));
+  const typeLabel = createLabelText("Type:");
+  const typeValue = createValueText(mapPropertyType(propertyDef.type));
   typeRow.appendChild(typeLabel);
   typeRow.appendChild(typeValue);
   detailsContainer.appendChild(typeRow);
@@ -707,7 +739,7 @@ function createPropertyVisualRow(
 
   switch (propertyDef.type) {
     case "BOOLEAN":
-      allowedValues = "true | false";
+      allowedValues = "true, false";
       defaultValue = String(propertyDef.defaultValue);
       break;
     case "TEXT":
@@ -734,23 +766,23 @@ function createPropertyVisualRow(
   }
 
   const allowedRow = createAutoLayoutFrame("Allowed Row", "HORIZONTAL", 0, 8);
-  const allowedLabel = createBoldBodyText("Allowed values:");
-  const allowedValue = createBodyText(allowedValues);
+  const allowedLabel = createLabelText("Allowed values:");
+  const allowedValue = createValueText(allowedValues);
   allowedRow.appendChild(allowedLabel);
   allowedRow.appendChild(allowedValue);
   detailsContainer.appendChild(allowedRow);
 
   // Default value
   const defaultRow = createAutoLayoutFrame("Default Row", "HORIZONTAL", 0, 8);
-  const defaultLabel = createBoldBodyText("Default:");
-  const defaultValueText = createBodyText(defaultValue);
+  const defaultLabel = createLabelText("Default:");
+  const defaultValueText = createValueText(defaultValue);
   defaultRow.appendChild(defaultLabel);
   defaultRow.appendChild(defaultValueText);
   detailsContainer.appendChild(defaultRow);
 
   // Description placeholder
   const descRow = createAutoLayoutFrame("Description Row", "VERTICAL", 0, 4);
-  const descLabel = createBoldBodyText("Description:");
+  const descLabel = createLabelText("Description:");
   const descValue = createBodyText("Describe what this property controls...", true);
   descRow.appendChild(descLabel);
   descRow.appendChild(descValue);
@@ -842,9 +874,11 @@ function createSection2FormalDefinition(
     // For component sets, get properties from the set level
     allDefinitions = componentOrSet.componentPropertyDefinitions || {};
 
-    // Display variants visually first
+    // Variants subsection with header and container
+    const variantsSection = createAutoLayoutFrame("Variants", "VERTICAL", 0, 16);
+
     const variantsHeading = createSubheadingText("Variants");
-    section.appendChild(variantsHeading);
+    variantsSection.appendChild(variantsHeading);
 
     const variants = componentOrSet.children.filter(
       (child): child is ComponentNode => child.type === "COMPONENT"
@@ -858,22 +892,25 @@ function createSection2FormalDefinition(
         variantsContainer.appendChild(variantRow);
       }
 
-      section.appendChild(variantsContainer);
-      // variantsContainer stays HUG (default)
+      variantsSection.appendChild(variantsContainer);
     } else {
       const noVariants = createBodyText("No variants found in this component set", true);
-      section.appendChild(noVariants);
+      variantsSection.appendChild(noVariants);
     }
+
+    section.appendChild(variantsSection);
   } else {
     // For single components, show a single visual display
     allDefinitions = componentOrSet.componentPropertyDefinitions || {};
 
+    const componentSection = createAutoLayoutFrame("Component", "VERTICAL", 0, 16);
     const componentHeading = createSubheadingText("Component");
-    section.appendChild(componentHeading);
+    componentSection.appendChild(componentHeading);
 
     const visualRow = createVariantVisualRow(componentOrSet);
-    section.appendChild(visualRow);
-    // visualRow stays HUG (default)
+    componentSection.appendChild(visualRow);
+
+    section.appendChild(componentSection);
   }
 
   // Extract non-variant properties
@@ -881,16 +918,11 @@ function createSection2FormalDefinition(
 
   // Only show if there are non-variant properties
   if (nonVariantProps.length > 0) {
-    // Separator
-    const separator = figma.createRectangle();
-    separator.name = "Separator";
-    separator.resize(100, 1);
-    separator.fills = [{ type: "SOLID", color: COLORS.border }];
-    section.appendChild(separator);
+    // Other Properties subsection with header and container
+    const otherPropsSection = createAutoLayoutFrame("Other Properties", "VERTICAL", 0, 16);
 
-    // Other properties heading
     const otherPropsHeading = createSubheadingText("Other Properties");
-    section.appendChild(otherPropsHeading);
+    otherPropsSection.appendChild(otherPropsHeading);
 
     // Get the default variant to use for visual display
     let defaultVariant: ComponentNode | null = null;
@@ -909,9 +941,10 @@ function createSection2FormalDefinition(
         propsContainer.appendChild(propRow);
       }
 
-      section.appendChild(propsContainer);
-      // propsContainer stays HUG (default)
+      otherPropsSection.appendChild(propsContainer);
     }
+
+    section.appendChild(otherPropsSection);
   }
 
   return section;
@@ -929,7 +962,7 @@ function createScreenshotPlaceholder(): FrameNode {
   frame.fills = [{ type: "SOLID", color: COLORS.background }]; // #FFFFFF
   frame.cornerRadius = 4;
 
-  const label = createBodyText("Drop screenshot here", true);
+  const label = createMediumText("Drop screenshot here");
   label.textAlignHorizontal = "CENTER";
   frame.appendChild(label);
 
@@ -941,7 +974,7 @@ function createScreenshotPlaceholder(): FrameNode {
 }
 
 function createDoOrDontCell(type: "DO" | "DON'T"): FrameNode {
-  const cell = createAutoLayoutFrame(`${type} Cell`, "VERTICAL", 16, 12);
+  const cell = createAutoLayoutFrame(`${type} Cell`, "VERTICAL", 24, 12);
   // layoutSizingHorizontal will be set after appending to parent
   cell.fills = [
     {
@@ -949,23 +982,24 @@ function createDoOrDontCell(type: "DO" | "DON'T"): FrameNode {
       color: type === "DO" ? COLORS.doColor : COLORS.dontColor,
     },
   ];
-  cell.cornerRadius = 8;
+  cell.cornerRadius = 12;
 
-  // Label
-  const label = createSubheadingText(type);
-  label.fills = [
-    {
-      type: "SOLID",
-      color:
-        type === "DO"
-          ? { r: 0.2, g: 0.6, b: 0.2 }
-          : { r: 0.7, g: 0.2, b: 0.2 },
-    },
-  ];
+  // Label - 20px Bold with color
+  const label = createTextNode(
+    type,
+    FONTS.heading,
+    20,
+    type === "DO" ? COLORS.doText : COLORS.dontText
+  );
   cell.appendChild(label);
 
-  // Title placeholder
-  const title = createBoldBodyText(`${type === "DO" ? "Do" : "Don't"}: Short title`);
+  // Title placeholder - 16px Bold
+  const title = createTextNode(
+    `${type === "DO" ? "Do" : "Don't"}: Short title`,
+    FONTS.heading,
+    16,
+    COLORS.text
+  );
   cell.appendChild(title);
   title.layoutSizingHorizontal = "FILL";
 
@@ -1003,17 +1037,23 @@ function createDoDontRow(index: number): FrameNode {
 function createSection3DosDonts(): FrameNode {
   const section = createSectionFrame("Dos / Don'ts");
 
+  // Header container with heading and description
+  const headerContainer = createAutoLayoutFrame("Header", "VERTICAL", 0, 16);
+
   // Heading
   const heading = createHeadingText("Dos / Don'ts");
-  section.appendChild(heading);
+  headerContainer.appendChild(heading);
 
   // Instructions
   const instructions = createBodyText(
     "Fill in examples of correct and incorrect usage patterns for this component.",
     true
   );
-  section.appendChild(instructions);
+  headerContainer.appendChild(instructions);
   instructions.layoutSizingHorizontal = "FILL";
+
+  section.appendChild(headerContainer);
+  headerContainer.layoutSizingHorizontal = "FILL";
 
   // Create DO/DON'T rows
   for (let i = 0; i < DEFAULT_DO_DONT_ROWS; i++) {
@@ -1029,52 +1069,72 @@ function createSection3DosDonts(): FrameNode {
 // Main Documentation Frame
 // =============================================================================
 
+// Create component container section with placeholder
+function createComponentContainer(): FrameNode {
+  const container = createAutoLayoutFrame("Component container", "VERTICAL", FRAME_PADDING, 0);
+  container.cornerRadius = 12;
+  container.primaryAxisAlignItems = "CENTER";
+  container.counterAxisAlignItems = "CENTER";
+
+  // Component placeholder
+  const placeholder = createAutoLayoutFrame("Component Placeholder", "VERTICAL", 16, 0);
+  placeholder.fills = [{ type: "SOLID", color: COLORS.background }];
+  placeholder.strokes = [{ type: "SOLID", color: COLORS.border }];
+  placeholder.strokeWeight = 1;
+  placeholder.dashPattern = [4, 4]; // Dashed border
+  placeholder.cornerRadius = 4;
+  placeholder.resize(500, 150);
+  placeholder.layoutSizingVertical = "FIXED";
+  placeholder.primaryAxisAlignItems = "CENTER";
+  placeholder.counterAxisAlignItems = "CENTER";
+
+  const placeholderText = createMediumText("Drop component here");
+  placeholderText.textAlignHorizontal = "CENTER";
+  placeholder.appendChild(placeholderText);
+
+  // Append placeholder to container FIRST, then set FILL sizing
+  container.appendChild(placeholder);
+  placeholder.layoutSizingHorizontal = "FILL";
+
+  return container;
+}
+
 function createDocumentationFrame(
   component: ComponentNode | ComponentSetNode
 ): FrameNode {
   const docFrame = createAutoLayoutFrame(
     `Documentation: ${component.name}`,
     "VERTICAL",
-    SECTION_PADDING,
-    SECTION_PADDING
+    FRAME_PADDING,
+    SECTION_SPACING
   );
 
   docFrame.layoutSizingHorizontal = "HUG";
   docFrame.layoutSizingVertical = "HUG";
   docFrame.fills = [{ type: "SOLID", color: COLORS.background }];
-  docFrame.cornerRadius = 12;
+  docFrame.cornerRadius = 32;
+  docFrame.strokes = [{ type: "SOLID", color: COLORS.border }];
+  docFrame.strokeWeight = 1;
 
-  // Add drop shadow
-  docFrame.effects = [
-    {
-      type: "DROP_SHADOW",
-      color: { r: 0, g: 0, b: 0, a: 0.1 },
-      offset: { x: 0, y: 4 },
-      radius: 12,
-      spread: 0,
-      visible: true,
-      blendMode: "NORMAL",
-    },
-  ];
-
-  // Title
-  const title = figma.createText();
-  title.fontName = FONTS.heading;
-  title.fontSize = 32;
-  title.characters = `${component.name} - Documentation`;
-  title.fills = [{ type: "SOLID", color: COLORS.text }];
+  // Title - 40px Bold
+  const title = createTitleText(`${component.name} - Documentation`);
   docFrame.appendChild(title);
 
-  // Section 1: fill-container
+  // Component container section with placeholder
+  const componentContainer = createComponentContainer();
+  docFrame.appendChild(componentContainer);
+  componentContainer.layoutSizingHorizontal = "FILL";
+
+  // Section 1: Description + behaviour
   const section1 = createSection1Description(component);
   docFrame.appendChild(section1);
   section1.layoutSizingHorizontal = "FILL";
 
-  // Section 2: hug-contents
+  // Section 2: Component definition
   const section2 = createSection2FormalDefinition(component);
   docFrame.appendChild(section2);
 
-  // Section 3: fill-container
+  // Section 3: Dos / Don'ts
   const section3 = createSection3DosDonts();
   docFrame.appendChild(section3);
   section3.layoutSizingHorizontal = "FILL";
@@ -1122,7 +1182,7 @@ async function main(): Promise<void> {
   const fontsLoaded = await loadRequiredFonts();
   if (!fontsLoaded) {
     figma.notify(
-      "⚠️ Failed to load fonts. Please ensure Roboto, Inter, or Arial is available.",
+      "⚠️ Failed to load fonts. Please ensure Manrope, Inter, or Roboto is available.",
       { error: true }
     );
     figma.closePlugin();
